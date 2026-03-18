@@ -359,7 +359,7 @@ with st.sidebar:
     api_key = st.secrets.get("NEWS_API_KEY", "")
 
     st.markdown("### 📡 Feed Settings")
-    sort_label = st.selectbox("Sort by", lUTC(SORT_OPTIONS.keys()))
+    sort_label = st.selectbox("Sort by", list(SORT_OPTIONS.keys()))
     sort_by    = SORT_OPTIONS[sort_label]
 
     date_range = st.slider("Days back", min_value=1, max_value=30, value=3)
