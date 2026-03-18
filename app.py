@@ -109,7 +109,7 @@ TOPICS = {
     "World": "world",
     "Markets": "stock market",
     "Finance": "finance banking",
-    "Technology": "technology AI",
+    "Tech": "technology AI",
     "Energy": "energy oil gas",
     "Industry": "manufacturing industry",
     "Climate": "climate environment",
