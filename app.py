@@ -1,115 +1,84 @@
 import streamlit as st
 import requests
 from datetime import datetime, timedelta
-import time
 
-# ─── PAGE CONFIG ─────────────────────────────────────────────────────────────
+# ─── PAGE CONFIG ─────────────────────────────────────────────
 st.set_page_config(
-    page_title="NEXUS | News Terminal",
-    page_icon="📡",
+    page_title="NEXUS Terminal",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="expanded"
 )
 
-# ─── STYLING (WHITE THEME) ───────────────────────────────────────────────────
+# ─── SAFE LIGHT STYLING (NO BREAKING SELECTORS) ──────────────
 st.markdown("""
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
-
-  html, body, [class*="css"] {
-    font-family: 'IBM Plex Sans', sans-serif;
+body {
     background-color: #ffffff;
     color: #111111;
-  }
+}
 
-  .main .block-container {
-    padding: 1rem 2rem;
-    max-width: 100%;
-  }
-
-  /* Header */
-  .terminal-header {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    padding: 10px 16px;
-    margin-bottom: 1rem;
+/* Header */
+.header {
     display: flex;
     justify-content: space-between;
-  }
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 20px;
+}
 
-  .terminal-logo {
-    font-size: 1.4rem;
+.logo {
+    font-size: 22px;
     font-weight: 600;
     color: #f59e0b;
-  }
+}
 
-  .terminal-time {
-    font-size: 0.8rem;
+.time {
+    font-size: 14px;
     color: #6b7280;
-  }
+}
 
-  /* Sidebar fix */
-  section[data-testid="stSidebar"] {
-    background-color: #ffffff;
-    border-right: 1px solid #e5e7eb;
-  }
-
-  /* Buttons */
-  button {
-    border-radius: 6px !important;
-    border: 1px solid #e5e7eb !important;
-    background: #f9fafb !important;
-  }
-
-  /* Cards */
-  .news-card {
-    background: #ffffff;
+/* Cards */
+.card {
     border: 1px solid #e5e7eb;
     border-left: 4px solid #f59e0b;
+    padding: 12px;
     border-radius: 6px;
-    padding: 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  }
+    margin-bottom: 12px;
+    background: #ffffff;
+}
 
-  .news-card:hover {
+.card:hover {
     background: #f9fafb;
-  }
+}
 
-  .news-title {
+.title {
     font-weight: 600;
-    margin-bottom: 5px;
-  }
+    margin-bottom: 6px;
+}
 
-  .news-desc {
+.desc {
+    font-size: 14px;
     color: #4b5563;
-    font-size: 0.9rem;
-  }
+}
 
-  .news-source {
-    font-size: 0.7rem;
-    color: #f59e0b;
-    margin-bottom: 5px;
-  }
-
-  .news-meta {
-    font-size: 0.7rem;
+.meta {
+    font-size: 12px;
     color: #6b7280;
     display: flex;
     justify-content: space-between;
-  }
-
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ─── CONSTANTS ───────────────────────────────────────────────────────────────
+# ─── CONSTANTS ─────────────────────────────────────────────
 NEWSAPI_BASE = "https://newsapi.org/v2"
 
 TOPICS = {
     "World": "world",
     "Markets": "stock market",
     "Finance": "finance banking",
-    "Tech": "technology AI",
+    "Technology": "technology AI",
     "Energy": "energy oil gas",
     "Industry": "manufacturing industry",
     "Climate": "climate environment",
@@ -120,7 +89,7 @@ TOPICS = {
     "Asia": "asia pacific",
 }
 
-# ─── API FUNCTIONS ────────────────────────────────────────────────────────────
+# ─── API ───────────────────────────────────────────────────
 @st.cache_data(ttl=300)
 def fetch_news(api_key, query):
     params = {
@@ -130,20 +99,24 @@ def fetch_news(api_key, query):
         "sortBy": "publishedAt",
         "language": "en"
     }
-    r = requests.get(f"{NEWSAPI_BASE}/everything", params=params)
-    return r.json().get("articles", [])
+    try:
+        res = requests.get(f"{NEWSAPI_BASE}/everything", params=params, timeout=10)
+        return res.json().get("articles", [])
+    except:
+        return []
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
+# ─── HELPERS ───────────────────────────────────────────────
 def time_ago(published_at):
     try:
         dt = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
         ist_now = datetime.utcnow() + timedelta(hours=5, minutes=30)
         diff = ist_now - dt
-        return f"{int(diff.total_seconds()//3600)}h ago"
+        hours = int(diff.total_seconds() // 3600)
+        return f"{hours}h ago"
     except:
         return ""
 
-def render_article(article):
+def render_card(article):
     title = article.get("title", "")
     desc = article.get("description", "")
     source = article.get("source", {}).get("name", "")
@@ -151,18 +124,18 @@ def render_article(article):
     pub = article.get("publishedAt", "")
 
     st.markdown(f"""
-    <div class="news-card">
-      <div class="news-source">{source}</div>
-      <div class="news-title">{title}</div>
-      <div class="news-desc">{desc}</div>
-      <div class="news-meta">
-        <span>{time_ago(pub)}</span>
-        <a href="{url}" target="_blank">Read →</a>
-      </div>
+    <div class="card">
+        <div style="font-size:12px;color:#f59e0b;margin-bottom:4px;">{source}</div>
+        <div class="title">{title}</div>
+        <div class="desc">{desc}</div>
+        <div class="meta">
+            <span>{time_ago(pub)}</span>
+            <a href="{url}" target="_blank">Read →</a>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
-# ─── SIDEBAR ─────────────────────────────────────────────────────────────────
+# ─── SIDEBAR (WORKING) ─────────────────────────────────────
 st.sidebar.title("Configuration")
 
 api_key = st.secrets.get("NEWS_API_KEY")
@@ -170,42 +143,41 @@ api_key = st.secrets.get("NEWS_API_KEY")
 if not api_key:
     api_key = st.sidebar.text_input("Enter NewsAPI Key", type="password")
 
-# ─── HEADER ──────────────────────────────────────────────────────────────────
+# ─── HEADER (IST TIME) ─────────────────────────────────────
 ist_time = datetime.utcnow() + timedelta(hours=5, minutes=30)
-now = ist_time.strftime("%Y-%m-%d  %H:%M:%S IST")
 
 st.markdown(f"""
-<div class="terminal-header">
-  <span class="terminal-logo">NEXUS TERMINAL</span>
-  <span class="terminal-time">{now}</span>
+<div class="header">
+    <div class="logo">NEXUS TERMINAL</div>
+    <div class="time">{ist_time.strftime("%Y-%m-%d %H:%M:%S IST")}</div>
 </div>
 """, unsafe_allow_html=True)
 
-# ─── TOPICS ──────────────────────────────────────────────────────────────────
-cols = st.columns(len(TOPICS))
+# ─── TOPIC SELECTOR ────────────────────────────────────────
+if "topic" not in st.session_state:
+    st.session_state.topic = "World"
 
-selected_topic = st.session_state.get("topic", "World")
+cols = st.columns(len(TOPICS))
 
 for i, topic in enumerate(TOPICS.keys()):
     if cols[i].button(topic):
-        selected_topic = topic
-        st.session_state["topic"] = topic
+        st.session_state.topic = topic
 
+selected_topic = st.session_state.topic
 query = TOPICS[selected_topic]
 
-# ─── FETCH DATA ───────────────────────────────────────────────────────────────
+# ─── FETCH DATA ───────────────────────────────────────────
 if not api_key:
     st.warning("Please enter your NewsAPI key")
     st.stop()
 
 articles = fetch_news(api_key, query)
 
-# ─── DISPLAY ─────────────────────────────────────────────────────────────────
+# ─── DISPLAY ──────────────────────────────────────────────
 st.subheader(f"{selected_topic} News")
 
-for article in articles:
-    render_article(article)
-
-# ─── AUTO REFRESH (optional) ─────────────────────────────────────────────────
-# time.sleep(60)
-# st.rerun()
+if not articles:
+    st.info("No articles found")
+else:
+    for article in articles:
+        render_card(article)
