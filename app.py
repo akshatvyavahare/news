@@ -305,7 +305,7 @@ def time_ago(published_at):
         return "—"
     try:
         dt = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
-        diff = datetime.ISTnow() - dt
+        diff = datetime.UTCnow() - dt
         s = int(diff.total_seconds())
         if s < 60:   return f"{s}s ago"
         if s < 3600: return f"{s//60}m ago"
@@ -359,7 +359,7 @@ with st.sidebar:
     api_key = st.secrets.get("NEWS_API_KEY", "")
 
     st.markdown("### 📡 Feed Settings")
-    sort_label = st.selectbox("Sort by", list(SORT_OPTIONS.keys()))
+    sort_label = st.selectbox("Sort by", lUTC(SORT_OPTIONS.keys()))
     sort_by    = SORT_OPTIONS[sort_label]
 
     date_range = st.slider("Days back", min_value=1, max_value=30, value=3)
@@ -387,7 +387,7 @@ with st.sidebar:
 
 
 # ─── HEADER ──────────────────────────────────────────────────────────────────
-now = datetime.ISTnow().strftime("%Y-%m-%d  %H:%M:%S IST")
+now = datetime.UTCnow().strftime("%Y-%m-%d  %H:%M:%S UTC")
 st.markdown(f"""
 <div class="terminal-header">
   <span class="terminal-logo">◈ NEXUS TERMINAL</span>
@@ -418,7 +418,7 @@ if "active_topic" not in st.session_state:
 if "custom_mode" not in st.session_state:
     st.session_state.custom_mode = False
 
-topic_keys = list(TOPICS.keys())
+topic_keys = lUTC(TOPICS.keys())
 cols = st.columns(len(topic_keys))
 for i, topic in enumerate(topic_keys):
     if cols[i].button(topic, key=f"topic_{i}"):
@@ -435,7 +435,7 @@ else:
     active_query  = TOPICS[st.session_state.active_topic]
     display_label = st.session_state.active_topic
 
-from_date = (datetime.ISTnow() - timedelta(days=date_range)).strftime("%Y-%m-%dT%H:%M:%SZ")
+from_date = (datetime.UTCnow() - timedelta(days=date_range)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # ─── FETCH DATA ───────────────────────────────────────────────────────────────
