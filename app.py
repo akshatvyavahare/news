@@ -305,7 +305,7 @@ def time_ago(published_at):
         return "—"
     try:
         dt = datetime.strptime(published_at, "%Y-%m-%dT%H:%M:%SZ")
-        diff = datetime.utcnow() - dt
+        diff = datetime.ISTnow() - dt
         s = int(diff.total_seconds())
         if s < 60:   return f"{s}s ago"
         if s < 3600: return f"{s//60}m ago"
@@ -387,7 +387,7 @@ with st.sidebar:
 
 
 # ─── HEADER ──────────────────────────────────────────────────────────────────
-now = datetime.utcnow().strftime("%Y-%m-%d  %H:%M:%S UTC")
+now = datetime.ISTnow().strftime("%Y-%m-%d  %H:%M:%S IST")
 st.markdown(f"""
 <div class="terminal-header">
   <span class="terminal-logo">◈ NEXUS TERMINAL</span>
@@ -435,7 +435,7 @@ else:
     active_query  = TOPICS[st.session_state.active_topic]
     display_label = st.session_state.active_topic
 
-from_date = (datetime.utcnow() - timedelta(days=date_range)).strftime("%Y-%m-%dT%H:%M:%SZ")
+from_date = (datetime.ISTnow() - timedelta(days=date_range)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 # ─── FETCH DATA ───────────────────────────────────────────────────────────────
