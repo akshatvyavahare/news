@@ -356,8 +356,7 @@ def render_article(article):
 # ─── SIDEBAR ─────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙ Configuration")
-    api_key = st.secrets["NEWS_API_KEY"] ("NewsAPI Key", type="password", placeholder="Enter your API key…",
-                             help="Get a free key at newsapi.org")
+    api_key = st.secrets.get("NEWS_API_KEY", "")
 
     st.markdown("### 📡 Feed Settings")
     sort_label = st.selectbox("Sort by", list(SORT_OPTIONS.keys()))
